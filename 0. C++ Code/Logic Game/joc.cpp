@@ -16,7 +16,8 @@ Joc::Joc() : m_mode(MODE_JOC_NONE),
              m_finalPartida(false),
              m_guanyador(SENSE_COLOR),
              m_fitxaSeleccionada(false),
-             m_posFitxaSeleccionada(-1, -1)
+             m_posFitxaSeleccionada(-1, -1),
+             m_prevMouseStatus(false)
 {
     inicialitza(MODE_JOC_NORMAL, "./data/Games/tauler_inicial.txt", "./data/Games/moviments.txt");
 }
@@ -87,6 +88,10 @@ bool Joc::actualitza(int mousePosX, int mousePosY, bool mouseStatus)
     GraphicManager::getInstance()->drawSprite(GRAFIC_TAULER, POS_X_TAULER, POS_Y_TAULER);
     m_tauler.visualitza();
     int fila, columna;
+
+    bool clickEdge = mouseStatus && !m_prevMouseStatus;
+    m_prevMouseStatus = mouseStatus;
+
     if (m_mode == MODE_JOC_NORMAL && mouseToBoard(mousePosX, mousePosY, fila, columna))
     {
         Posicio posClic(fila, columna);
@@ -144,7 +149,7 @@ bool Joc::actualitza(int mousePosX, int mousePosY, bool mouseStatus)
         }
     }
 
-    if (m_mode == MODE_JOC_REPLAY && mouseStatus)
+    if (m_mode == MODE_JOC_REPLAY && clickEdge)
     {
         // Si quedan movimientos por reproducir, saca el siguiente
         if (!m_cua.estaBuida())
@@ -152,7 +157,7 @@ bool Joc::actualitza(int mousePosX, int mousePosY, bool mouseStatus)
             Moviment mov;
             if (m_cua.treu(mov))
             {
-                auto cami = mov.getCami();
+                vector<Posicio> cami = mov.getCami();
                 if (cami.size() >= 2)
                 {
                     // mueve la pieza del primer al último paso

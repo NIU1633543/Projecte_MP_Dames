@@ -29,6 +29,7 @@ private:
     vector<Posicio> m_movimentsValids; ///< Llista de moviments vàlids
     string m_nomFitxerMoviments;   ///< Nom del fitxer per guardar moviments
     string m_missatge;             ///< Missatge informatiu o d'error
+    bool m_prevMouseStatus;        ///< Guarda l'estat anterior del ratolí
 
     /**
      * @brief Comprova si no queden moviments possibles per finalitzar la partida.
