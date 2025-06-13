@@ -83,7 +83,7 @@ void Joc::inicialitza(ModeJoc mode, const string &nomFitxerTauler, const string 
 // Gestiona esdeveniments del ratolí i actualitza la lògica i la vista del joc.
 bool Joc::actualitza(int mousePosX, int mousePosY, bool mouseStatus)
 {
-    // Dibujar elementos estéticos
+    // Dibuixar elements estètics
     GraphicManager::getInstance()->drawSprite(GRAFIC_FONS, 0, 0);
     GraphicManager::getInstance()->drawSprite(GRAFIC_TAULER, POS_X_TAULER, POS_Y_TAULER);
     m_tauler.visualitza();
@@ -97,17 +97,17 @@ bool Joc::actualitza(int mousePosX, int mousePosY, bool mouseStatus)
         Posicio posClic(fila, columna);
         Fitxa &fitxa = m_tauler.getFitxa(posClic);
 
-        if (mouseStatus)
+        if (clickEdge)
         {
             if (!m_fitxaSeleccionada)
             {
-                // Seleccionar ficha si es del jugador actual
+                // Seleccionar fitxa si és del jugador actual
                 if (fitxa.getTipus() != BUIT && fitxa.getColor() == m_torn)
                 {
                     m_fitxaSeleccionada = true;
                     m_posFitxaSeleccionada = posClic;
 
-                    // Obtener movimientos válidos
+                    // Obtenir moviments vàlids
                     m_movimentsValids.clear();
                     int nPosicions = 0;
                     Posicio posicionsPossibles[20];
@@ -121,7 +121,7 @@ bool Joc::actualitza(int mousePosX, int mousePosY, bool mouseStatus)
             }
             else
             {
-                // Mover ficha si el destino es válido
+                // Moure fitxa si el destí és vàlid
                 bool destiValid = false;
                 for (const Posicio &desti : m_movimentsValids)
                 {
@@ -136,13 +136,38 @@ bool Joc::actualitza(int mousePosX, int mousePosY, bool mouseStatus)
                 {
                     if (m_tauler.mouFitxa(m_posFitxaSeleccionada, posClic))
                     {
-                        // Cambiar turno después de mover
+                        // Canviar torn després de moure
                         m_torn = (m_torn == BLANCA) ? NEGRA : BLANCA;
                         m_cua.afegeix(Moviment(m_posFitxaSeleccionada, posClic));
                     }
                 }
+                else if (posClic == m_posFitxaSeleccionada)
+                {
+                    // Clic a la mateixa fitxa -> cancel·lar selecció
+                    m_fitxaSeleccionada = false;
+                    m_movimentsValids.clear();
+                }
+                else if (fitxa.getTipus() != BUIT && fitxa.getColor() == m_torn)
+                {
+                    // Seleccionar una altra fitxa del mateix color
+                    m_posFitxaSeleccionada = posClic;
+                    m_movimentsValids.clear();
+                    int nPosicions = 0;
+                    Posicio posicionsPossibles[20];
+                    m_tauler.getPosicionsPossibles(m_posFitxaSeleccionada, nPosicions, posicionsPossibles);
+                    for (int i = 0; i < nPosicions; i++)
+                        m_movimentsValids.push_back(posicionsPossibles[i]);
+                    // Sortir sense fer reset a la selecció
+                    return false;
+                }
+                else
+                {
+                    // Clic fora d'opcions -> cancel·lar selecció
+                    m_fitxaSeleccionada = false;
+                    m_movimentsValids.clear();
+                }
 
-                // Reset selección
+                // Reset selecció
                 m_fitxaSeleccionada = false;
                 m_movimentsValids.clear();
             }
